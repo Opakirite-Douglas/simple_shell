@@ -1,98 +1,118 @@
-#include "shell.h"
+#include "myShellHeader.h"
+
 /**
- * _getenv - get the value of the enviroment path variable
- * @env: key of the enviroment varaible
+ * _myenv - This will print the current environment in this prog
  *
- * Return: return pointer
+ * @info: This is the structure that contains arguments
+ *
+ * Return: 0(Always)
+ *
  */
 
-char *_getenv(char *env)
+int _myenv(info_t *info)
 {
-	size_t i = 0, j, k;
-
-	j = _strlen(env);
-	while (environ[i])
+	print_list_str(info->env);
 	{
-		if (_strncmp(environ[i], env, j) == 0)
+	return (0);
+	}
+}
+
+/**
+ * _getenv - This func will get the value of
+ * an environ variable in this prog
+ *
+ * @info: This is the structure that contains arguments
+ *
+ * @name: This is the name
+ *
+ * Return: value
+ *
+ */
+
+char *_getenv(info_t *info, const char *name)
+{
+	list_t *node = info->env;
+	char *p;
+
+	while (node)
+	{
+		p = starts_with(node->str, name);
+		if (p && *p)
 		{
-			for (k = 0; environ[i][k]; k++)
-			{
-				if (environ[i][k] == '=')
-					return (&environ[i][++k]);
-			}
+			return (p);
 		}
-		i++;
+		node = node->next;
 	}
 	return (NULL);
 }
-/**
- * add_node_end - add a node to the end of the linked list
- * @head: head pointer of the linked list
- * @environ: value to be strored
- *
- * Return: return a struct pointer
- */
-struct path_env *add_node_end(struct path_env **head, char *environ)
-{
-	struct path_env *dir = *head;
-	struct path_env *new_node = NULL;
 
-
-	new_node = malloc(sizeof(struct path_env));
-	if (!new_node)
-	{
-		free(new_node);
-		return (NULL);
-	}
-	new_node->string = environ;
-	new_node->len = _strlen(environ);
-	new_node->next = NULL;
-	if (!*head)
-	{
-		*head = new_node;
-		return (*head);
-	}
-	while (dir->next)
-		dir = dir->next;
-	dir->next = new_node;
-	return (*head);
-}
 /**
- * set_path - set the path of the command enter by the user
+ * _mysetenv - This func will either Initialize a new
+ * environment variable or will just simply modify an existing one
  *
- * Return: return struct pointer
+ * @info: This is the structure that contains arguments
+ *
+ *  Return: 0(Always)
+ *
  */
-struct path_env *set_path()
+
+int _mysetenv(info_t *info)
 {
-	char *path, *find;
-	char *token, *delim = ":";
-	struct path_env *path_var = NULL, *head = NULL;
-	path = malloc(sizeof(char) * _strlen(_getenv("PATH")));
-	if (!path)
+	if (info->argc != 3)
 	{
-		free(path);
-		return (NULL);
+		_eputs("Incorrect number of arguements\n");
+		return (1);
 	}
-	find = _getenv("PATH");
-	_strcpy(path, find);
-	token = strtok(path, delim);
-	while (token)
+	if (_setenv(info, info->argv[1], info->argv[2]))
 	{
-		head = add_node_end(&path_var, token);
-		token = strtok(NULL, delim);
-	}
-	free(path);
-	return (head);
-}
-/**
- * check_file - check a file if it exist
- * @filepath: the filepath to the file
- * Return: return 0 if found and 1 otherwise
- */
-ssize_t check_file(char *filepath)
-{
-	struct stat buffer;
-	if (stat(filepath, &buffer) == 0)
 		return (0);
-	return (-1);
+	}
+	return (1);
+}
+
+/**
+ * _myunsetenv - This func will remove an environment variable in ur prog
+ *
+ * @info: This is the structure that containin arguments
+ *
+ *  Return: 0(Always)
+ *
+ */
+
+int _myunsetenv(info_t *info)
+{
+	int f;
+
+	if (info->argc == 1)
+	{
+		_eputs("Too few arguements.\n");
+		return (1);
+	}
+	for (f = 1; f <= info->argc; f++)
+		_unsetenv(info, info->argv[f]);
+
+	return (0);
+}
+
+/**
+ * populate_env_list - This func populates
+ * env linked list in this prog
+ *
+ * @info: This is the structure that contains arguments
+ *
+ * Return: 0(Always)
+ *
+ */
+
+int populate_env_list(info_t *info)
+{
+	size_t f;
+	list_t *node = NULL;
+
+	for (f = 0; environ[f]; f++)
+	{
+		add_node_end(&node, environ[f], 0);
+	}
+	info->env = node;
+	return (0);
 }
