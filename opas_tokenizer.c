@@ -44,7 +44,7 @@ char **strtow(char *str, char *d)
 			if (!s[g])
 				for (e = 0; e < g; e++)
 					free(s[e]);
-			free(s);
+				free(s);
 			return (NULL);
 		for (m = 0; m < e; m++)
 			s[g][m] = str[f++];
