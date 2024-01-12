@@ -41,11 +41,11 @@ char **strtow(char *str, char *d)
 		while (!is_delim(str[f + e], d) && str[f + e])
 			e++;
 		s[g] = malloc((e + 1) * sizeof(char));
-			if (!s[g])
-				for (e = 0; e < g; e++)
-					free(s[e]);
+		if (!s[g])
+			for (e = 0; e < g; e++)
+				free(s[e]);
 			free(s);
-		return (NULL);
+			return (NULL);
 		for (m = 0; m < e; m++)
 			s[g][m] = str[f++];
 		s[g][m] = 0;
